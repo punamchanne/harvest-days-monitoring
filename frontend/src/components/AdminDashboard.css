@@ -1,0 +1,55 @@
+.admin-theme {
+  --factory-blue: #1e3a8a;
+  --bg-gray: #f4f7fa;
+  --text-dark: #333;
+  --harvest-green: #27ae60;
+  --waiting-orange: #f39c12;
+}
+
+.admin-theme .sidebar { background: var(--factory-blue); }
+
+.admin-theme .main-content { background: var(--bg-gray); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.stat-card h3 { font-size: 14px; color: #777; margin-bottom: 10px; }
+.stat-card p { font-size: 24px; font-weight: 600; color: var(--factory-blue); }
+
+.admin-theme .table-container {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+.admin-theme table thead th {
+  background: #f8f9fa;
+  padding: 15px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #666;
+  border-bottom: 2px solid #eee;
+}
+
+.admin-theme table tbody td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #444;
+}
+
+.status-ready { background: #e8f5e9; color: var(--harvest-green); }
+.status-growing { background: #fff3e0; color: var(--waiting-orange); }

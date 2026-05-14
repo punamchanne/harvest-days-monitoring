@@ -1,0 +1,67 @@
+.dark-theme {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --text: #f8fafc;
+  --online: #4ade80;
+  --offline: #f87171;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+.dark-theme .main-content { background: var(--bg); }
+.dark-theme .sidebar { background: #000; }
+
+.sensor-card {
+  background: var(--card-bg);
+  border-radius: 15px;
+  padding: 20px;
+  border: 1px solid #334155;
+  transition: 0.3s;
+}
+
+.sensor-card:hover { border-color: var(--accent); }
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge.online { background: rgba(74, 222, 128, 0.1); color: var(--online); }
+.badge.offline { background: rgba(248, 113, 113, 0.1); color: var(--offline); }
+
+.technical-info { font-size: 13px; color: #94a3b8; }
+.info-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.info-row b { color: var(--text); }
+
+.progress-mini {
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-bar { height: 100%; transition: 0.5s; }
+
+.voltage-tag { color: #facc15; font-weight: bold; font-size: 11px; margin-top: 10px; }
+
+.logic-info {
+  margin-top: 40px;
+  padding: 20px;
+  background: #1e293b;
+  border-radius: 10px;
+  border: 1px dashed #475569;
+}
+
+.logic-info h4 { margin-bottom: 10px; color: var(--accent); }
+.logic-info p { font-size: 13px; color: #94a3b8; }

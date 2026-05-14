@@ -1,0 +1,79 @@
+.directory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.controls {
+  display: flex;
+  gap: 15px;
+}
+
+.search-box {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 300px;
+  outline: none;
+}
+
+.filter-select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+}
+
+.farmer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.farmer-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border-left: 5px solid var(--factory-blue);
+  transition: 0.3s;
+}
+
+.farmer-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+
+.farmer-info h3 { font-size: 18px; margin-bottom: 5px; color: var(--factory-blue); }
+.farmer-info p { font-size: 13px; color: #666; margin-bottom: 8px; }
+
+.contact-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.call-btn {
+  background: var(--harvest-green);
+  color: white;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.view-map {
+  color: #555;
+  text-decoration: underline;
+  font-size: 12px;
+}
+
+.total-count {
+  background: #eee;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-top: 5px;
+  display: inline-block;
+}
