@@ -6,33 +6,57 @@ import './Dashboard.css';
 
 const socket = io('http://localhost:5000');
 
-function App() {
+function Dashboard() {
+  const [currentUser, setCurrentUser] = useState(null);
+  
   const [sensorData, setSensorData] = useState({
-    brix: '17.80',
+    brix: '0.0',
     nir: '620',
     moisture: '48',
     temp: '30.5'
   });
+  
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('Analyzing...');
+  const [status, setStatus] = useState('Ripening');
   
   const syncStatus = (brixVal) => {
     const b = parseFloat(brixVal);
     if (b >= 19.0) {
       setAiResult({ message: `Optimal Sugar (${b}%)! READY FOR HARVEST.`, type: 'success' });
-      setStatus('MATURE (Peak)');
+      setStatus('Ready to Harvest');
     } else {
       const daysLeft = Math.ceil((20 - b) / 0.15);
       setAiResult({ message: `Sweetness is rising (${b}%). Approx. ${daysLeft} DAYS until peak maturity.`, type: 'warning' });
-      setStatus(`RIPENING (~${daysLeft} days)`);
+      setStatus(`In Growth (~${daysLeft} days)`);
     }
   };
 
   useEffect(() => {
+    // Load current user from localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setCurrentUser(parsedUser);
+      
+      // Initialize brix and status from database value
+      const dbBrix = parsedUser.brix ? parseFloat(parsedUser.brix) : 0.0;
+      setSensorData(prev => ({
+        ...prev,
+        brix: dbBrix.toFixed(2)
+      }));
+      setStatus(parsedUser.status || 'In Growth');
+      if (dbBrix > 0) {
+        syncStatus(dbBrix);
+      }
+    }
+
+    // Socket.io for live sensor monitoring
     socket.on('update_dashboard', (data) => {
       setSensorData(prev => ({ ...prev, ...data }));
-      syncStatus(data.brix);
+      if (data.brix) {
+        syncStatus(data.brix);
+      }
     });
 
     return () => socket.off('update_dashboard');
@@ -40,8 +64,10 @@ function App() {
 
   const runAIAnalysis = async () => {
     setLoading(true);
+    setAiResult(null);
     try {
       const response = await axios.post('http://localhost:5000/predict', {
+        username: currentUser ? currentUser.username : '',
         nir: parseFloat(sensorData.nir),
         moisture: parseFloat(sensorData.moisture),
         temp: parseFloat(sensorData.temp)
@@ -49,11 +75,27 @@ function App() {
 
       if (response.data.status === 'success') {
         const brixVal = response.data.brix;
-        setSensorData(prev => ({ ...prev, brix: brixVal }));
+        const predStatus = response.data.prediction_status;
+        const harvestDate = response.data.harvest_date;
+
+        setSensorData(prev => ({ ...prev, brix: brixVal.toFixed(2) }));
         syncStatus(brixVal);
+        
+        // Update user session in localStorage so that it updates instantly
+        if (currentUser) {
+          const updatedUser = { 
+            ...currentUser, 
+            brix: brixVal.toFixed(2) + '%', 
+            status: predStatus, 
+            harvest_date: harvestDate 
+          };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          setCurrentUser(updatedUser);
+        }
       }
     } catch (error) {
-      setAiResult({ message: 'Backend error. Check app.py console.', type: 'error' });
+      console.error(error);
+      setAiResult({ message: 'Error processing sensor analysis. Verify backend app.py.', type: 'error' });
     }
     setLoading(false);
   };
@@ -65,14 +107,18 @@ function App() {
         <header className="header-bar">
           <div>
             <h1>Field Monitoring</h1>
-            <p className="node-info">Node: ESP32-dev | Status: Active</p>
+            <p className="node-info">
+              Grower: <b>{currentUser ? currentUser.name : 'Farmer'}</b> | 
+              Variety: <b>{currentUser ? currentUser.variety : 'Co 86032'}</b> |
+              Area: <b>{currentUser ? currentUser.area : 'N/A'}</b>
+            </p>
           </div>
-          <div className="ai-badge">● AI ENGINE CONNECTED</div>
+          <div className="ai-badge">● AI PREDICTION LIVE</div>
         </header>
 
         <div className="sensor-grid">
           <div className="card brix-card">
-            <span className="label">Predicted Brix (Sugar Content)</span>
+            <span className="label">Sugar Level (Brix Value)</span>
             <div className="value">{sensorData.brix}%</div>
             <p className="status-tag">Status: {status}</p>
           </div>
@@ -114,12 +160,12 @@ function App() {
 
         <section className="ai-section">
           <h3>AI Quality Analyzer</h3>
-          <p>Process sensor data through the ML Prediction Engine</p>
+          <p>Process your spectral readings through the deep learning model to predict sugarcane maturity.</p>
           
           {!loading ? (
             <button className="ai-btn" onClick={runAIAnalysis}>Run AI Analysis</button>
           ) : (
-            <div className="loader"></div>
+            <div className="loader" style={{ margin: '15px auto' }}></div>
           )}
 
           {aiResult && (
@@ -133,4 +179,4 @@ function App() {
   );
 }
 
-export default App;
+export default Dashboard;
