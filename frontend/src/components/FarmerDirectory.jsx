@@ -17,6 +17,7 @@ function FarmerDirectory() {
   const [location, setLocation] = useState('');
   const [area, setArea] = useState('');
   const [variety, setVariety] = useState('Co 86032');
+  const [brix, setBrix] = useState('18.0');
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -83,7 +84,8 @@ function FarmerDirectory() {
           phone,
           location,
           area: area ? `${area} Acres` : '',
-          variety
+          variety,
+          brix: brix ? `${brix}%` : '0.0%'
         })
       });
 
@@ -101,6 +103,7 @@ function FarmerDirectory() {
       setLocation('');
       setArea('');
       setVariety('Co 86032');
+      setBrix('18.0');
       
       // Refresh directory list
       fetchFarmers();
@@ -278,6 +281,17 @@ function FarmerDirectory() {
                       placeholder="e.g. 10" 
                       value={area} 
                       onChange={(e) => setArea(e.target.value)} 
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Sugar Level (Brix %)</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      placeholder="e.g. 18.0" 
+                      value={brix} 
+                      onChange={(e) => setBrix(e.target.value)} 
                     />
                   </div>
 
