@@ -172,9 +172,16 @@ except Exception as e:
 
 def run_tflite_inference(data):
     if not MODEL_LOADED:
-        # Dummy Logic if model is missing
+        # Realistic Agriculture Dummy Logic mapping to Brix range 13.5% to 22.5%
         nir, moisture, temp = data
-        prediction = (nir / 40) - (moisture / 15) + (temp / 20)
+        # Lower moisture concentrates sugars (raises brix). Higher temp and NIR values map to better quality.
+        base_brix = 18.0
+        moisture_factor = (50.0 - moisture) * 0.18
+        nir_factor = (nir - 620.0) * 0.06
+        temp_factor = (temp - 29.0) * 0.12
+        
+        prediction = base_brix + moisture_factor + nir_factor + temp_factor
+        prediction = max(13.5, min(22.5, prediction))
         return round(prediction, 2)
 
     try:

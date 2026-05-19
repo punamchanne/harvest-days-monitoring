@@ -10,7 +10,7 @@ function Dashboard() {
   const [currentUser, setCurrentUser] = useState(null);
   
   const [sensorData, setSensorData] = useState({
-    brix: '0.0',
+    brix: localStorage.getItem('active_brix') || '0.0',
     nir: '620',
     moisture: '48',
     temp: '30.5'
@@ -18,7 +18,7 @@ function Dashboard() {
   
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('Pending Scan');
+  const [status, setStatus] = useState(localStorage.getItem('active_status') || 'Pending Scan');
   
   const syncStatus = (brixVal) => {
     const b = parseFloat(brixVal);
@@ -38,6 +38,11 @@ function Dashboard() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setCurrentUser(parsedUser);
+    }
+
+    const activeBrix = parseFloat(localStorage.getItem('active_brix') || '0.0');
+    if (activeBrix > 0) {
+      syncStatus(activeBrix);
     }
 
     // --- Robust Local Sensor Simulation Interval ---
@@ -87,6 +92,10 @@ function Dashboard() {
         setSensorData(prev => ({ ...prev, brix: brixVal.toFixed(2) }));
         syncStatus(brixVal);
         
+        // Save to active session keys so it persists during this login session
+        localStorage.setItem('active_brix', brixVal.toFixed(2));
+        localStorage.setItem('active_status', predStatus);
+
         // Update user session in localStorage so that it updates instantly
         if (currentUser) {
           const updatedUser = { 
