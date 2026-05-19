@@ -273,6 +273,23 @@ def register():
         location = data.get('location', '')
         area = data.get('area', '')
         variety = data.get('variety', '')
+        brix = data.get('brix', '0.0%')
+
+        # Dynamically calculate harvest status and calendar date based on custom Brix input
+        try:
+            brix_val = float(brix.replace('%', '').strip())
+        except Exception:
+            brix_val = 0.0
+
+        if brix_val >= 19.0:
+            status = 'Ready to Harvest'
+            harvest_date = 'Ready to Harvest'
+        else:
+            status = 'In Growth'
+            days_left = max(1, int((20.0 - brix_val) / 0.15))
+            import datetime
+            future_date = datetime.datetime.now() + datetime.timedelta(days=days_left)
+            harvest_date = future_date.strftime('%d-%b-%Y')
 
         if not role or not username or not password or not name:
             return jsonify({"status": "error", "message": "Missing required fields"}), 400
@@ -295,9 +312,9 @@ def register():
             'location': location,
             'area': area,
             'variety': variety,
-            'brix': '0.0%',
-            'status': 'In Growth',
-            'harvest_date': 'TBD'
+            'brix': brix,
+            'status': status,
+            'harvest_date': harvest_date
         }
         
         users_collection.insert_one(new_user)

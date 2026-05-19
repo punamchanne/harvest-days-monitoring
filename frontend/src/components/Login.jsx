@@ -14,6 +14,7 @@ function Login() {
   const [location, setLocation] = useState('');
   const [area, setArea] = useState('');
   const [variety, setVariety] = useState('Co 86032');
+  const [brix, setBrix] = useState('18.0');
   
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -31,7 +32,7 @@ function Login() {
     const endpoint = isRegister ? `${baseUrl}/api/register` : `${baseUrl}/api/login`;
     
     const payload = isRegister 
-      ? { role, username, password, name, phone, location, area: role === 'farmer' ? `${area} Acres` : '', variety: role === 'farmer' ? variety : '' }
+      ? { role, username, password, name, phone, location, area: role === 'farmer' ? `${area} Acres` : '', variety: role === 'farmer' ? variety : '', brix: role === 'farmer' ? `${brix}%` : '0.0%' }
       : { role, username, password };
 
     try {
@@ -51,6 +52,7 @@ function Login() {
         setSuccessMsg('Registration Successful! Please Sign In.');
         setIsRegister(false);
         setPassword('');
+        setBrix('18.0');
       } else {
         // Login success
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -146,15 +148,27 @@ function Login() {
               </div>
               
               {role === 'farmer' && (
-                <div className="input-group">
-                  <input 
-                    type="number" 
-                    placeholder="Farm Area (in Acres)" 
-                    value={area}
-                    onChange={(e) => setArea(e.target.value)}
-                    required 
-                  />
-                </div>
+                <>
+                  <div className="input-group">
+                    <input 
+                      type="number" 
+                      placeholder="Farm Area (in Acres)" 
+                      value={area}
+                      onChange={(e) => setArea(e.target.value)}
+                      required 
+                    />
+                  </div>
+                  <div className="input-group">
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      placeholder="Sugar Level (Brix %)" 
+                      value={brix}
+                      onChange={(e) => setBrix(e.target.value)}
+                      required 
+                    />
+                  </div>
+                </>
               )}
             </>
           )}
