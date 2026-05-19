@@ -18,7 +18,7 @@ function Dashboard() {
   
   const [aiResult, setAiResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState('Ripening');
+  const [status, setStatus] = useState('Pending Scan');
   
   const syncStatus = (brixVal) => {
     const b = parseFloat(brixVal);
@@ -38,28 +38,34 @@ function Dashboard() {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       setCurrentUser(parsedUser);
-      
-      // Initialize brix and status from database value
-      const dbBrix = parsedUser.brix ? parseFloat(parsedUser.brix) : 0.0;
-      setSensorData(prev => ({
-        ...prev,
-        brix: dbBrix.toFixed(2)
-      }));
-      setStatus(parsedUser.status || 'In Growth');
-      if (dbBrix > 0) {
-        syncStatus(dbBrix);
-      }
     }
 
-    // Socket.io for live sensor monitoring
+    // --- Robust Local Sensor Simulation Interval ---
+    // Guarantees that the live values (NIR, Moisture, Temp) ALWAYS simulate and update
+    // every 4 seconds in real-time in the browser!
+    const simulationInterval = setInterval(() => {
+      setSensorData(prev => {
+        const newNir = Math.floor(610 + Math.random() * 40); // 610 - 650
+        const newMoisture = Math.floor(40 + Math.random() * 20); // 40 - 60
+        const newTemp = (25 + Math.random() * 10).toFixed(1); // 25.0 - 35.0
+        return {
+          ...prev,
+          nir: String(newNir),
+          moisture: String(newMoisture),
+          temp: String(newTemp)
+        };
+      });
+    }, 4000);
+
+    // Socket.io for live sensor monitoring (acts as receiver for ESP32)
     socket.on('update_dashboard', (data) => {
       setSensorData(prev => ({ ...prev, ...data }));
-      if (data.brix) {
-        syncStatus(data.brix);
-      }
     });
 
-    return () => socket.off('update_dashboard');
+    return () => {
+      clearInterval(simulationInterval);
+      socket.off('update_dashboard');
+    };
   }, []);
 
   const runAIAnalysis = async () => {
