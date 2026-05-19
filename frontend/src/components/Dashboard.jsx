@@ -108,7 +108,8 @@ function Dashboard() {
           <div>
             <h1>Field Monitoring</h1>
             <p className="node-info">
-              Grower: <b>{currentUser ? currentUser.name : 'Farmer'}</b> | 
+              Grower ID: <b>#SC-{1000 + (currentUser?.id || 1)}</b> | 
+              Name: <b>{currentUser ? currentUser.name : 'Farmer'}</b> | 
               Variety: <b>{currentUser ? currentUser.variety : 'Co 86032'}</b> |
               Area: <b>{currentUser ? currentUser.area : 'N/A'}</b>
             </p>

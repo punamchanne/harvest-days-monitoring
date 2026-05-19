@@ -43,6 +43,29 @@ function FarmerDirectory() {
     fetchFarmers();
   }, []);
 
+  const handleDeleteFarmer = async (farmerUsername, farmerName) => {
+    if (!window.confirm(`Are you sure you want to delete farmer "${farmerName}"? This will permanently delete their account and history records!`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/farmers/${farmerUsername}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      if (response.ok && data.status === 'success') {
+        alert(`Farmer "${farmerName}" has been successfully deleted.`);
+        fetchFarmers();
+      } else {
+        alert(data.message || 'Failed to delete farmer.');
+      }
+    } catch (err) {
+      console.error("Error deleting farmer:", err);
+      alert("Failed to connect to server. Please try again.");
+    }
+  };
+
   const handleAddFarmer = async (e) => {
     e.preventDefault();
     setModalError('');
@@ -163,9 +186,18 @@ function FarmerDirectory() {
                 <div className="farmer-info">
                   <div className="card-top-row">
                     <span className="farmer-id-badge">#SC-{1000 + farmer.id}</span>
-                    <span className={`status-badge-inline ${farmer.status === 'Ready to Harvest' ? 'status-ready' : 'status-growing'}`}>
-                      {farmer.status}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className={`status-badge-inline ${farmer.status === 'Ready to Harvest' ? 'status-ready' : 'status-growing'}`}>
+                        {farmer.status}
+                      </span>
+                      <button 
+                        className="delete-btn-card" 
+                        onClick={() => handleDeleteFarmer(farmer.username, farmer.name)}
+                        title="Delete Grower Account"
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </div>
                   <h3>{farmer.name}</h3>
                   <p className="farmer-username">👤 @{farmer.username}</p>

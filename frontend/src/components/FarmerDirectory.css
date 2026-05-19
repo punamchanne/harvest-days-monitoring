@@ -410,3 +410,25 @@
     grid-column: span 1;
   }
 }
+
+.delete-btn-card {
+  background: #fee2e2;
+  border: none;
+  color: #ef4444;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.delete-btn-card:hover {
+  background: #ef4444;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(239, 68, 68, 0.25);
+}

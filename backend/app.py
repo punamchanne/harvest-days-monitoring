@@ -102,7 +102,54 @@ def init_db():
             users_collection.insert_many(default_users)
             print("Successfully seeded MongoDB database with default users.")
         else:
-            print("MongoDB already contains user records. Skipping seeding.")
+            print("MongoDB already contains user records. Skipping user seeding.")
+            
+        # Seed default history logs if empty
+        if history_collection.count_documents({}) == 0:
+            default_history = [
+                {
+                    'username': 'vijaykadam@1977',
+                    'timestamp': '2026-05-18 10:30',
+                    'brix': '20.1%',
+                    'nir': 615.0,
+                    'moisture': 46.0,
+                    'temp': 29.8,
+                    'status': 'Ready to Harvest',
+                    'harvest_date': 'Ready to Harvest'
+                },
+                {
+                    'username': 'vijaykadam@1977',
+                    'timestamp': '2026-05-17 14:15',
+                    'brix': '19.5%',
+                    'nir': 622.0,
+                    'moisture': 44.0,
+                    'temp': 31.2,
+                    'status': 'Ready to Harvest',
+                    'harvest_date': 'Ready to Harvest'
+                },
+                {
+                    'username': 'vijaykadam@1977',
+                    'timestamp': '2026-05-16 09:45',
+                    'brix': '18.2%',
+                    'nir': 630.0,
+                    'moisture': 50.0,
+                    'temp': 28.6,
+                    'status': 'In Growth',
+                    'harvest_date': 'In 12 Days'
+                },
+                {
+                    'username': 'vijaykadam@1977',
+                    'timestamp': '2026-05-15 16:20',
+                    'brix': '16.8%',
+                    'nir': 642.0,
+                    'moisture': 52.0,
+                    'temp': 27.4,
+                    'status': 'In Growth',
+                    'harvest_date': 'In 21 Days'
+                }
+            ]
+            history_collection.insert_many(default_history)
+            print("Successfully seeded MongoDB history collection with default logs.")
     except Exception as e:
         print(f"Error seeding MongoDB: {e}")
 
@@ -336,6 +383,19 @@ def add_farmer():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/farmers/<username>', methods=['DELETE'])
+def delete_farmer(username):
+    try:
+        res = users_collection.delete_one({'username': username, 'role': 'farmer'})
+        if res.deleted_count == 0:
+            return jsonify({"status": "error", "message": "Farmer not found"}), 404
+        
+        # Clean up their history as well
+        history_collection.delete_many({'username': username})
+        return jsonify({"status": "success", "message": "Farmer deleted successfully"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/api/update_brix', methods=['POST'])
 def update_brix():
     try:
@@ -371,15 +431,36 @@ def get_user_history(username):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+background_thread = None
+
+def sensor_simulation_task():
+    import random
+    print("Background Sensor Simulator Thread Started...")
+    while True:
+        data = {
+            "nir": random.randint(600, 650),
+            "moisture": random.randint(40, 60),
+            "temp": round(random.uniform(25.0, 35.0), 1)
+        }
+        # Broadcast to all connected clients
+        socketio.emit('update_dashboard', data)
+        socketio.sleep(4)
+
+@socketio.on('connect')
+def handle_connect():
+    global background_thread
+    print("React Frontend Client Connected to SocketIO!")
+    if background_thread is None:
+        background_thread = socketio.start_background_task(sensor_simulation_task)
+
 @socketio.on('sensor_data')
 def handle_sensor_data(data):
     """
-    Handles incoming sensor data from ESP32 or other sources
+    Handles incoming raw sensor data from a physical ESP32
     and broadcasts it to the frontend.
     """
-    print(f"Received sensor data: {data}")
-    # Broadcast to all connected clients (the dashboard)
-    emit('update_dashboard', data, broadcast=True)
+    print(f"Received raw ESP32 data: {data}")
+    socketio.emit('update_dashboard', data)
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
